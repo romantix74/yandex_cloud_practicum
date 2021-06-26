@@ -7,6 +7,7 @@
 	yc iam create-token
 	
 3 Create file "credentials.tf"
+
 	provider "yandex" {
 	  token     = "OAuth_token"
 	  cloud_id  = "cloud-id"
