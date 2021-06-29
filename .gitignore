@@ -1,2 +1,10 @@
+# Local .terraform directories
+**/.terraform/*
+
 credetials.tf
 terraform.exe
+
+
+# .tfstate files
+*.tfstate
+*.tfstate.*

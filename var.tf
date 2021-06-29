@@ -1,4 +1,4 @@
 resource "yandex_compute_image" "test_image" {
   name       = "my-custom-image"
-  source_url = "https://storage.yandexcloud.net/lucky-images/kube-it.img"
+  source_image = "fd83klic6c8gfgi40urb"
 }
