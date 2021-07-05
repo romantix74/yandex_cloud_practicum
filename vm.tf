@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-}
-
-
 
 resource "yandex_compute_instance" "vm-1" {
   metadata = {
@@ -29,11 +20,11 @@ resource "yandex_compute_instance" "vm-1" {
 
   network_interface {
     subnet_id = yandex_vpc_subnet.test_subnet.id
-	nat = true
+    nat       = true
   }
 }
 
 
 output "instance_external_ip" {
-  value = "${yandex_compute_instance.vm-1.network_interface.0.nat_ip_address}"
+  value = yandex_compute_instance.vm-1.network_interface.0.nat_ip_address
 }

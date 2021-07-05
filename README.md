@@ -14,6 +14,25 @@
 	  folder_id = "folder-id"
 	  zone      = "ru-central1-a"
 	}
+	terraform {
+	  required_providers {
+		yandex = {
+		  source = "yandex-cloud/yandex"
+		}
+	  }
+
+	  backend "s3" {
+		endpoint   = "storage.yandexcloud.net"
+		bucket     = "terraform-object-storage-romantix74"
+		region     = "ru-central1"
+		key        = "terraform.tfstate"
+		access_key = " YOUR_KEY_IDENTIFIER"
+		secret_key = "YOUR_KEY"
+
+		skip_region_validation      = true
+		skip_credentials_validation = true
+	  }
+	}
 
 4 Create metadata file for ssh keys
 
