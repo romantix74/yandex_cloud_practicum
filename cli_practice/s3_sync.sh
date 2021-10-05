@@ -1,0 +1,1 @@
+s3cmd sync s3://practicum-20210913/ local_dir/

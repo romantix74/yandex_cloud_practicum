@@ -3,6 +3,7 @@
 
 credetials.tf
 terraform.exe
+*.lock.hcl
 
 
 # .tfstate files
