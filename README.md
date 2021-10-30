@@ -26,7 +26,7 @@
 		bucket     = "terraform-object-storage-romantix74"
 		region     = "ru-central1"
 		key        = "terraform.tfstate"
-		access_key = " YOUR_KEY_IDENTIFIER"
+		access_key = "YOUR_KEY_IDENTIFIER"
 		secret_key = "YOUR_KEY"
 
 		skip_region_validation      = true
