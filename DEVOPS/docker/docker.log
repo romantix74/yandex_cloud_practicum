@@ -1,0 +1,36 @@
+molecule converge -- -vvv --tags foo,bar
+
+
+ веб-консоли перейдите в реестр и предоставьте всем пользователям право использовать хранящиеся образы. 
+ Для этого в правом верхнем углу нажмите кнопку ACL реестра. В списке ролей для allUsers уже отмечена роль viewer,
+ отметьте вторую роль — container-registry.images.puller — и сохраните настройки.
+image
+Создайте виртуальную машину с помощью Container Optimized Image.
+При создании машины в разделе Выбор образа загрузочного диска переключитесь на вкладку Container Solution и нажмите Настроить. 
+Выберите из реестра созданный образ, остальные настройки оставьте по умолчанию и нажмите Применить.
+Другие настройки виртуальной машины мы уже разбирали.
+Когда новая виртуальная машина получит статус Running, в веб-консоли посмотрите ее внешний IP адрес и убедитесь, 
+что по этому адресу отображается приветственная страница nginx.
+Обратите внимание! C помощью Docker-образа вы создали и запустили виртуальную машину с предустановленным, нужным вам ПО. 
+При этом вам даже не потребовалось заходить внутрь ВМ и выполнять установку или настройку ПО вручную.
+
+# чтобы docker работал без sudo
+echo "export DOCKER_HOST=tcp://localhost:2375" >> ~/.bashrc && source ~/.bashrc
+
+# пушим в яндекс регистри
+docker push cr.yandex/crpv26585uggfofucjn4/ubuntu-nginx:latest
+
+# собираем
+docker build . -t cr.yandex/crpv26585uggfofucjn4/ubuntu-nginx:latest
+
+# Аутентифицируйтесь в Yandex Container Registry с помощью Docker Credential helper
+yc container registry configure-docker
+
+id: crpv26585uggfofucjn4
+folder_id: b1g7s2jj07pt6rc3i44m
+name: my-registry
+status: ACTIVE
+created_at: "2021-12-20T19:03:06.504Z"
+
+
+yc container registry create --name my-registry

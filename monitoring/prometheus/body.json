@@ -1,0 +1,12 @@
+{
+    "metrics": [
+        {
+            "name": "temperature",
+            "labels": {
+                "building": "office",
+                "room": "openspace"
+            },
+            "value": 18.6
+        }
+    ]
+}

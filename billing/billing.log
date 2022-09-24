@@ -1,0 +1,32 @@
+yc compute instance add-labels fhm3bvveh5b537es7jn7 --labels project=test1
+yc compute instance add-labels fhm7trefal91ihrl0vpd --labels project=test2
+yc compute instance add-labels fhmk980hi62n0dhp9c4f --labels project=test3
+yc compute instance add-labels fhmu1pphuh5v3n5foq16 --labels project=test4
+
+yc compute instance create \
+--name test-1 \
+--create-boot-disk image-folder-id=standard-images,image-family=ubuntu-2004-lts \
+--zone ru-central1-a \
+--network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
+--core-fraction 5
+
+yc compute instance create \
+--name test-2 \
+--create-boot-disk image-folder-id=standard-images,image-family=ubuntu-2004-lts \
+--zone ru-central1-a \
+--network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
+--core-fraction 20
+
+yc compute instance create \
+--name test-3 \
+--create-boot-disk image-folder-id=standard-images,image-family=ubuntu-2004-lts \
+--zone ru-central1-a \
+--network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
+--core-fraction 50 --async
+
+yc compute instance create \
+--name test-4 \
+--create-boot-disk image-folder-id=standard-images,image-family=ubuntu-2004-lts \
+--zone ru-central1-a \
+--network-interface subnet-name=default-ru-central1-a,nat-ip-version=ipv4 \
+--core-fraction 100 --async

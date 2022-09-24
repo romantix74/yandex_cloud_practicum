@@ -1,0 +1,62 @@
+ Миграция данных в облако
+ 1) Миграция схемы
+ 
+pg_dump -h <адрес сервера СУБД> \
+    -U <имя пользователя> \
+    -p <порт> \
+    --schema-only \
+    --no-privileges \
+    --no-subscriptions \
+    -d <имя базы данных> -Fd -f /tmp/db_dump
+ 
+ 
+pg_restore -Fd -v --single-transaction -s --no-privileges \
+          -h <адрес приемника> \
+          -U <имя пользователя> \
+          -p 6432 \
+          -d <имя базы данных> /tmp/db_dump
+ 
+на хосте с которого мигрируем
+	CREATE PUBLICATION p_data_migration FOR ALL TABLES;
+
+ на хосте НА который мигрируем
+	CREATE SUBSCRIPTION s_data_migration CONNECTION 'host=<адрес сервера-источника> port=<порт> user=<имя пользователя> sslmode=verify-full dbname=<имя базы данных>' PUBLICATION p_data_migration;
+  
+wo SSL  
+	CREATE SUBSCRIPTION s_data_migration CONNECTION 'host=<адрес сервера-источника> port=<порт> user=<имя пользователя> sslmode=disable dbname=<имя базы данных>' PUBLICATION p_data_migration;
+ 
+статус репликации 
+	select * from pg_subscription_rel;
+ 
+ 
+\copy dtm(depot,store,time,distance) from 'input/test.csv' DELIMITERS ',' CSV HEADER;
+
+
+CREATE TABLE dtm (
+    id serial PRIMARY KEY,
+    depot int NOT NULL,
+    store int  NOT NULL,
+    time int NOT NULL,
+       distance int  NOT NULL
+);
+
+
+SELECT version();
+
+yc managed-postgresql cluster create \
+  --name mypg \
+  --environment production \
+  --network-name default \
+  --resource-preset s2.micro \
+  --host zone-id=ru-central1-c,subnet-id=b0rcctk2rvtr8efcch64 \
+  --disk-type network-hdd \
+  --disk-size 10 \
+  --user name=user1,password=user1user1 \
+  --database name=db1,owner=user1 \
+  --security-group-ids enp6saqnq4ie244g67sb
+  
+  
+ =====2021.11.03====
+  
+  
+  

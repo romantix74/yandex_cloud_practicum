@@ -1,0 +1,83 @@
+# Проверим работоспособность функции:
+yc serverless function version list --function-name function-for-postgresql
+yc serverless function invoke --name function-for-postgresql
+
+# Создадим нашу функцию function-for-postgresql, при этом сразу зададим все необходимые переменные и сервисный аккаунт:
+yc serverless function create \
+--name  function-for-postgresql \
+--description "function for postgresql"
+
+id: d4epl7e9r9v3m5o4pfno
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-15T13:10:10.885Z"
+name: function-for-postgresql
+description: function for postgresql
+log_group_id: ckgjqkil3t3unmdj59fg
+http_invoke_url: https://functions.yandexcloud.net/d4epl7e9r9v3m5o4pfno
+status: ACTIVE
+
+
+yc serverless function version create \
+--function-name=function-for-postgresql \
+--memory=256m \
+--execution-timeout=5s \
+--runtime=python37 \
+--entrypoint=function-for-postgresql.entry \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--environment VERBOSE_LOG=True \
+--environment CONNECTION_ID=$CONNECTION_ID \
+--environment DB_USER=$DB_USER \
+--environment DB_HOST=$DB_HOST \
+--source-path function-for-postgresql.py
+
+echo "export CONNECTION_ID=akfd0ddmt0sco96p8hg3" >> ~/.bashrc && . ~/.bashrc
+echo "export DB_USER=user1" >> ~/.bashrc && . ~/.bashrc
+echo "export DB_HOST=akfd0ddmt0sco96p8hg3.postgresql-proxy.serverless.yandexcloud.net" >> ~/.bashrc && . ~/.bashrc
+
+--- Шаг 4. Создание функции ---
+в gui при функций создаем подключение и в подробностях смотрим:
+
+Идентификатор
+akfd0ddmt0sco96p8hg3
+
+
+Точка входа
+akfd0ddmt0sco96p8hg3.postgresql-proxy.serverless.yandexcloud.net
+
+--- Шаг 3. Подключение к управляемым БД из функции ---
+
+CREATE TABLE measurements (
+    result integer,
+    time float
+);
+
+
+yc managed-postgresql cluster create \
+--name my-pg-database \
+--description 'For Serverless' \
+--postgresql-version 13 \
+--environment production \
+--network-name default \
+--resource-preset b2.nano \
+--host zone-id=ru-central1-c,subnet-id=b0cot5queegmqtraqvg1 \
+--disk-type network-hdd \
+--disk-size 10 \
+--user name=user1,password=user1user1 \
+--database name=db1,owner=user1 \
+--websql-access \
+--serverless-access
+
+Создание кластера PostgreSQL
+Конечно, кластер PostgreSQL можно создать с помощью UI, но в этой лабораторной работе мы используем CLI. Прежде всего, давайте определим подсеть, в которой будет расположен кластер. Разместим кластер в зоне ru-central1-c и с помощью следующей команды узнаем ID соответствующей подсети:
+yc vpc subnet list
+
+# Шаг 2. Yandex Managed Service for PostgreSQL
+
+# добавить роль serverless.mdbProxies.user для подключения к управляемым БД из функции.
+yc resource-manager folder add-access-binding $FOLDER_ID \
+    --role serverless.mdbProxies.user \
+    --subject serviceAccount:$SERVICE_ACCOUNT_ID
+
+Практическая работа. Проверка доступности
+На этом практическом занятии вы разберётесь с тем, как создавать кластер в сервисе Yandex Managed Service for PostgreSQL. Вы напишете функцию для проверки доступности сайта yandex.ru, которая будет измерять время ответа. Результаты работы функции вы поместите в базу данных, используя подключение к управляемым БД из функции. Также вы запустите триггер-таймер, который будет регулярно производить опрос сервера.
+

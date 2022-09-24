@@ -1,0 +1,230 @@
+
+В Object Storage для простоты используем тот же бакет, куда далее будем складывать видео. Открываем Объекты, вверху справа выбираем Загрузить и загружаем наш архив в бакет.
+Создадим функции ffmpeg-api и ffmpeg-converter, при этом сразу зададим все необходимые переменные и сервисный аккаунт:
+yc serverless function create \
+    --name ffmpeg-api \
+    --description "function for ffmpeg-api"
+
+    yc serverless function create \
+    --name ffmpeg-converter \
+    --description "function for ffmpeg-converter"
+
+    yc serverless function version create \
+    --function-name ffmpeg-api \
+    --memory=256m \
+    --execution-timeout=5s \
+    --runtime=python37 \
+    --entrypoint=index.handle_api \
+    --service-account-id $SERVICE_ACCOUNT_FFMPEG_ID \
+    --environment SECRET_ID=$SECRET_ID \
+    --environment YMQ_QUEUE_URL=$YMQ_QUEUE_URL \
+    --environment DOCAPI_ENDPOINT=$DOCAPI_ENDPOINT \
+    --package-bucket-name $S3_BUCKET \
+    --package-object-name src.zip
+
+    yc serverless function version create \
+    --function-name ffmpeg-converter \
+    --memory=2048m \
+    --execution-timeout=600s \
+    --runtime=python37 \
+    --entrypoint=index.handle_process_event \
+    --service-account-id $SERVICE_ACCOUNT_FFMPEG_ID \
+    --environment SECRET_ID=$SECRET_ID \
+    --environment YMQ_QUEUE_URL=$YMQ_QUEUE_URL \
+    --environment DOCAPI_ENDPOINT=$DOCAPI_ENDPOINT \
+    --environment S3_BUCKET=$S3_BUCKET \
+    --package-bucket-name $S3_BUCKET \
+    --package-object-name src.zip
+
+
+zip src.zip index.py requirements.txt ffmpeg
+
+https://johnvansickle.com/ffmpeg/
+
+# Проверим заданные ранее переменные:
+    echo $SERVICE_ACCOUNT_FFMPEG_ID
+    echo $SECRET_ID
+    echo $YMQ_QUEUE_URL
+    echo $DOCAPI_ENDPOINT
+    echo $S3_BUCKET
+
+# При создании функций нам потребуется ряд переменных:
+SECRET_ID — идентификатор секрета (можно получить из таблицы со списком секретов);
+YMQ_QUEUE_URL — URL очереди (можно получить на странице обзора);
+DOCAPI_ENDPOINT — его можно получить на странице обзора БД, нужен именно Document API;
+S3_BUCKET — имя бакета, в нашем случае это storage-for-ffmpeg74.
+# Шаг 5. Создание функций ##
+
+echo "export S3_BUCKET=storage-for-ffmpeg74" >> ~/.bashrc && . ~/.bashrc
+echo $S3_BUCKET
+# Шаг 4. Создание бакета в сервисе Object Storage
+
+# Находясь в одном каталоге с файлом tasks.json, вызовите следующую команду для создания таблицы:
+aws dynamodb create-table --cli-input-json file://tasks.json \
+--endpoint-url $DOCAPI_ENDPOINT \
+--region ru-central1
+
+# Как только база данных создана, воспользуемся ранее использованной утилитой
+# AWS CLI для создания документной таблицы в этой базе данных.
+# Всю конфигурацию возьмем из файла tasks.json:
+
+# Сразу получим и сохраним document_api_endpoint в значение переменной DOCAPI_ENDPOINT:
+	yc ydb database get --name ffmpeg
+	echo "export DOCAPI_ENDPOINT=https://docapi.serverless.yandexcloud.net/ru-central1/b1ghaq177q6g5noa48fh/etn0sql42g769ud9utbi" >> ~/.bashrc && . ~/.bashrc
+	echo $DOCAPI_ENDPOINT
+
+#Создадим базу данных YDB с именем ffmpeg и типом serverless, используя для этого флаг --serverless:
+	yc ydb database create ffmpeg --serverless --folder-id $FOLDER_ID
+	yc ydb database list
+
+### Шаг 3. Создание базы данных в сервисе Yandex Database ##
+
+echo "export YMQ_QUEUE_ARN=yrn:yc:ymq:ru-central1:b1g7s2jj07pt6rc3i44m:ffmpeg" >> ~/.bashrc && . ~/.bashrc
+echo $YMQ_QUEUE_ARN
+
+# Еще вам потребует значение атрибута QueueArn, получим его:
+aws sqs get-queue-attributes \
+--endpoint https://message-queue.api.cloud.yandex.net \
+--queue-url $YMQ_QUEUE_URL \
+--attribute-names QueueArn
+{
+    "Attributes": {
+        "QueueArn": "yrn:yc:ymq:ru-central1:b1g7s2jj07pt6rc3i44m:ffmpeg"
+    }
+}
+
+
+
+# Запишем значения URL в переменную YMQ_QUEUE_URL. Она потребуется нам при создании функции:
+echo "export YMQ_QUEUE_URL=https://message-queue.api.cloud.yandex.net/b1ghaq177q6g5noa48fh/dj6000000005atfh02ae/ffmpeg" >> ~/.bashrc && . ~/.bashrc
+echo $YMQ_QUEUE_URL
+
+aws sqs create-queue --queue-name ffmpeg --endpoint https://message-queue.api.cloud.yandex.net/
+{
+    "QueueUrl": "https://message-queue.api.cloud.yandex.net/b1ghaq177q6g5noa48fh/dj6000000005atfh02ae/ffmpeg"
+}
+
+
+aws configure
+
+# Шаг 2. Создание очереди Yandex Message Queue
+
+yc lockbox secret list
+yc lockbox secret get --name ffmpeg-sa-key
+
+echo "export SECRET_ID=e6q2hklq39bva4s78nlc" >> ~/.bashrc && . ~/.bashrc
+echo $SECRET_ID
+
+yc config profile list
+- для просмотра профилей --
+
+    yc lockbox secret create --name ffmpeg-sa-key \
+    --folder-id $FOLDER_ID \
+    --description "keys for serverless" \
+    --payload '[{"key": "ACCESS_KEY_ID", "text_value": "aje4j74et6n2vrrb0bfv"}, {"key": "SECRET_ACCESS_KEY", "text_value": "r7upOMOquotuW4MDFvE34t752NKaV4tTyhAoDCE-"}]'
+
+	id: e6q2hklq39bva4s78nlc
+	folder_id: b1g7s2jj07pt6rc3i44m
+	created_at: "2022-02-22T18:09:24.101Z"
+	name: ffmpeg-sa-key
+	description: keys for serverless
+	status: ACTIVE
+	current_version:
+	  id: e6q6bd3vkgh1br5vqtgg
+	  secret_id: e6q2hklq39bva4s78nlc
+	  created_at: "2022-02-22T18:09:24.101Z"
+	  status: ACTIVE
+	  payload_entry_keys:
+	  - ACCESS_KEY_ID
+	  - SECRET_ACCESS_KEY
+
+
+
+В сервисе Lockbox (находится на стадии Preview) cоздайте ваш первый секрет, состоящий из набора версий, в которых хранятся ваши данные. Версия содержит наборы ключей и значений:
+Ключ — несекретное название для значения, по которому вы будете его идентифицировать.
+Значение — это секретные данные.
+
+###Создание элемента в сервисе Lockbox
+### 2022.02.22 ############
+
+# Создание ключа доступа для сервисного аккаунта
+# Этот этап нужен для получения идентификатора ключа доступа и секретного ключа, которые будут использованы для загрузки файлов в Object Storage, работы с Yandex Message Queue и т.д. Для создания ключа доступа необходимо вызвать следующую команду:
+yc iam access-key create --service-account-name ffmpeg-account-for-cf
+
+access_key:
+  id: aje4j74et6n2vrrb0bfv
+  service_account_id: ajeemvrs1s8v5bcr2qae
+  created_at: "2022-02-17T08:33:36.145803317Z"
+  key_id: 8sxGikkraKCEwqGfWPCP
+secret: r7upOMOquotuW4MDFvE34t752NKaV4tTyhAoDCE-
+
+
+
+# Назначение роли сервисному аккаунту
+# Добавим вновь созданному сервисному аккаунту роли storage.viewer, storage.uploader, ymq.reader, ymq.writer, ydb.admin, serverless.functions.invoker, и lockbox.payloadViewer:
+echo "export FOLDER_ID=$(yc config get folder-id)" >> ~/.bashrc && . ~/.bashrc
+    echo $FOLDER_ID
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role storage.viewer
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role storage.uploader
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role ymq.reader
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role ymq.writer
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role ydb.admin
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role serverless.functions.invoker
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role lockbox.payloadViewer
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_FFMPEG_ID \
+    --role editor
+
+
+
+
+# После проверки запишите ID созданного сервисного аккаунта в переменную SERVICE_ACCOUNT_ID:
+echo "export SERVICE_ACCOUNT_FFMPEG_ID=ajeemvrs1s8v5bcr2qae" >> ~/.bashrc && . ~/.bashrc
+echo $SERVICE_ACCOUNT_FFMPEG_ID
+
+# Проверьте текущий список сервисных аккаунтов:
+yc iam service-account list
+
+export SERVICE_ACCOUNT=$(yc iam service-account create --name ffmpeg-account-for-cf \
+--description "service account for serverless" \
+--format json | jq -r .)
+
+
+# Шаг 1. Service Account и Lockbox
+# Создание аккаунта
+
+
+Почему для решения этой задачи нужны очереди?
+Представим, что мы попытались решить эту задачу «в лоб». Пользователь заходит на страницу и вводит ссылку на видеофайл. Сервис скачивает его, конвертирует и отдает ссылку на GIF. Возникают две серьёзные проблемы:
+Синхронное соединение не всегда стабильно. Чем дольше вы его держите, тем выше вероятность, что оно разорвётся. В этом случае всё придётся сделать заново. А если соединение нестабильно, то пользователь может и не дождаться результата.
+Задача ресурсоёмкая: если сервисом одновременно воспользуются много пользователей с большими видеороликами, мощностей может не хватить.
+Чтобы избежать этих проблем, в архитектуру сервиса необходимо встроить очередь.
+
+
+# В этой практической работе мы реализуем проект, который позволит пользователям конвертировать
+# видеофайлы в GIF. Такая задача хорошо подходит для Сloud Functions,
+# потому что конвертирование отнимает немало ресурсов процессора, и чем качественнее видео,
+ # тем больше ресурсов требуется на его обработку.
+# ---- Однократная отправка сообщений -----

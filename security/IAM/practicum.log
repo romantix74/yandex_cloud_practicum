@@ -1,0 +1,99 @@
+Ротируйте ключ шифрования
+	yc kms symmetric-key rotate abjedr1q1lf13t93tf25
+
+!!! у меня не сработало
+	ERROR: rpc error: code = PermissionDenied desc = Permission denied
+
+В CLI переключитесь обратно в профиль сервисного аккаунта
+	yc config profile activate iam-practice-profile
+####   ШАГ 5 ####
+
+Перейдем к назначению сервисному аккаунту роли kms.admin для управления созданным
+ ключом шифрования. Перед этим нужно сначала вернуться в профиль вашего аккаунта.
+ Выполните команды
+	yc --folder-name default kms symmetric-key \
+	add-access-binding abjedr1q1lf13t93tf25 --role kms.admin \
+	--subject serviceAccount:ajecjv0ut3bar3nvh65j
+
+создал ключ key-lab23
+abjedr1q1lf13t93tf25
+
+Теперь нужно создать ключ шифрования, ротацией которого вы будете
+управлять с помощью сервисного аккаунта. Для этого перейдите в дашборд каталога
+в консоли управления, нажмите кнопку Создать ресурс и выберите Ключ шифрования.
+№  ШАГ 4 --------
+
+
+
+Чтобы убедиться, что все сделано правильно, выведите информацию об авторизации и ключах доступа
+	yc config list
+
+service-account-key:
+  id: ajecjv0ut3bar3nvh65j
+  service_account_id: ajeuroa267vsd9uuhn3i
+  created_at: "2022-02-19T18:59:11.304515863Z"
+  key_algorithm: RSA_2048
+  public_key: |
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkDNra94M2EU8yPBcXpuz
+    DQ2UHuABJ2uYxRnvU+v8EbS6j4DYBw7dbCeIGUQTMfMBzOgwL5rVnyLvRHmbZXLL
+    gOQNLKM01b3rIjDVIiyxQZv8Joi+U6PAAJ0wbFNgHu2BQm64KiQ6aw9uW7lwl05E
+    Vq+4jijXljlBuuY1kBSqZgXC0xilUQ3ZhZdXiMnB+3qgydA9qZfLqSJUgVg32+hx
+    m4tR/+XtSn3EaUUafiCsInSqn2EL9g8Lq+b9IEWpHYoUMzPG6ifW5EhDUoUvFg/X
+    GrcznL1uNduJgPGXdSPBxHtrtPruuMJiR3Be4ZIeBrsSA0SXriVxe8nR0D4Y8bMi
+    WwIDAQAB
+    -----END PUBLIC KEY-----
+  private_key: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCQM2tr3gzYRTzI
+    8Fxem7MNDZQe4AEna5jFGe9T6/wRtLqPgNgHDt1s
+
+Привяжите к этому профилю ранее созданный статический ключ доступа с помощью команды
+	yc config set service-account-key key.json
+
+Теперь нужно создать профиль, от имени которого будут выполняться операции
+из-под сервисного аккаунта. Для этого придумайте имя этого профиля
+(например, yc-lab23-profile) и выполните команду
+	yc config profile create iam-practice-profile
+
+После выполнения команды вы получите идентификатор созданной ключевой пары.
+Используя статические ключи доступа, можно получить IAM-токен для авторизации в сервисах.
+
+Настройте аутентификацию под сервисным аккаунтом с вашей машины. Для этого сначала нужно создать статические ключи доступа и сохранить их в json-файле (например, key.json).
+Воспользуйтесь для этого командой
+	yc --folder-name default iam key create \
+	--service-account-name iam-practice --output key.json
+ШАГ 3
+
+Теперь предоставьте вашему пользовательскому аккаунту права на управление созданным сервисным аккаунтом. Для этого нужно выполнить команду
+yc iam service-account add-access-binding ajeuroa267vsd9uuhn3i \
+--role editor --subject userAccount:ajed6bmclk6hv076enbg
+
+yc iam user-account get romantix74@yandex.ru
+id: ajed6bmclk6hv076enbg
+yandex_passport_user_account:
+  login: romantix74
+  default_email: romantix74@yandex.ru
+
+
+yc iam service-account list
+ajeuroa267vsd9uuhn3i | iam-practice
+
+yc iam role list
+ШАГ 2
+
+в веб консоли содаем аккаунт . я придумал iam-practice
+ШАГ 1
+
+Чтобы решить эту задачу, понадобится выполнить следующие шаги:
+	Создать сервисный аккаунт.
+	Получить права на управление этим сервисным аккаунтом.
+	Создать статические ключи доступа и привязать их к сервисному аккаунту,
+	чтобы он мог пройти авторизацию в сервисе KMS.
+	Создать в сервисе KMS ключ шифрования и назначить сервисному аккаунту
+	роль kms.admin для управления этим ключом.
+	И, наконец, ротировать ключ, то есть создать его новую версию с такими же
+	параметрами, из-под сервисного аккаунта.
+
+Предположим, что перед вами стоит задача использовать сервисный аккаунт для ротации ключей.
+# Практическая работа. Права доступа и роли для сервисного аккаунта

@@ -1,0 +1,201 @@
+
+Скопируем служебный домен, чтобы проверить работоспособность API-шлюза и созданного приложения целиком. Вставьте адрес в браузер. Должно получиться следующее:
+https://d5dc09gcdu1snu4jjpvo.apigw.yandexcloud.net/
+
+В результате успешного создания API-шлюза получим domain:
+    yc serverless api-gateway list
+    yc serverless api-gateway get --name for-serverless-shortener
+
+    yc serverless api-gateway create \
+    --name for-serverless-shortener \
+    --spec=for-serverless-shortener.yml \
+    --description "for serverless shortener"
+
+id: d5dc09gcdu1snu4jjpvo
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-24T11:07:47.110Z"
+name: for-serverless-shortener
+description: for serverless shortener
+status: ACTIVE
+domain: d5dc09gcdu1snu4jjpvo.apigw.yandexcloud.net
+log_group_id: ckgr1ribc2lckgcua13m
+connectivity: {}
+
+
+Создадим спецификацию for-serverless-shortener.yml со следующим содержанием:
+
+#### Шаг 5. Конфигурирование Yandex API Gateway #####
+
+Создадим нашу функцию for-serverless-shortener, при этом сразу зададим все необходимые переменные, сервисный аккаунт и сделаем ее публичной:
+    yc serverless function create \
+    --name for-serverless-shortener \
+    --description "function for serverless-shortener"
+
+
+id: d4erfroa3hajovmshrv4
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-24T11:03:51.787Z"
+name: for-serverless-shortener
+description: function for serverless-shortener
+log_group_id: ckgi51igd1go8d3qe92p
+http_invoke_url: https://functions.yandexcloud.net/d4erfroa3hajovmshrv4
+
+
+    yc serverless function version create \
+    --function-name for-serverless-shortener \
+    --memory=256m \
+    --execution-timeout=5s \
+    --runtime=python37 \
+    --entrypoint=index.handler \
+    --service-account-id $SERVICE_ACCOUNT_SHORTENER_ID \
+    --environment USE_METADATA_CREDENTIALS=1 \
+    --environment endpoint=grpcs://ydb.serverless.yandexcloud.net:2135 \
+    --environment database=$YDB_DATABASE \
+    --source-path src.zip
+
+    yc serverless function allow-unauthenticated-invoke for-serverless-shortener
+
+id: d4edkmct36a28ups8org
+function_id: d4erfroa3hajovmshrv4
+created_at: "2022-02-24T11:04:02.805Z"
+runtime: python37
+entrypoint: index.handler
+resources:
+  memory: "268435456"
+execution_timeout: 5s
+service_account_id: ajeu5f3s3s3f97c988dg
+image_size: "11575296"
+status: ACTIVE
+tags:
+- $latest
+log_group_id: ckgi51igd1go8d3qe92p
+
+
+
+
+В переменные окружения функции необходимо добавить три переменные:
+	endpoint — нужно указать протокол grpcs:// и добавить значение Эндпоинт из секции YDB эндпоинт, обычно получается grpcs://ydb.serverless.yandexcloud.net:2135.
+	database — это значение поля База данных из секции YDB эндпоинт, начинаться с /ru-central1/.... мы ранее уже создали ее YDB_DATABASE.
+	USE_METADATA_CREDENTIALS — выставите значение переменной в 1.
+
+
+zip src.zip index.py requirements.txt
+
+###  Шаг 4. Создание функции ####
+
+Запустите создание таблицы и проверьте результат создания:
+    ydb \
+    --endpoint $YDB_ENDPOINT \
+    --database $YDB_DATABASE \
+    --sa-key-file $SA_KEY_FILE \
+    scripting yql --file links.yql
+
+    ydb \
+    --endpoint $YDB_ENDPOINT \
+    --database $YDB_DATABASE \
+    --sa-key-file $SA_KEY_FILE \
+    scheme describe links
+
+
+Воспользуемся SQL скриптом для создания таблицы и сохраним его в файл links.yql
+
+
+   echo "export SA_KEY_FILE=$PWD/serverless-shortener.sa" >> ~/.bashrc && . ~/.bashrc
+    echo $SA_KEY_FILE
+
+    ydb \
+    --endpoint $YDB_ENDPOINT \
+    --database $YDB_DATABASE \
+    --sa-key-file $SA_KEY_FILE \
+    discovery whoami \
+    --groups
+
+
+При запуске команды YDB CLI укажите путь к файлу с авторизованным ключом доступа сервисного аккаунта
+с помощью аргумента --sa-key-file . Чтобы не указывать этот параметр при каждом вызове команды, сохраните
+путь к файлу в переменную окружения SA_KEY_FILE7
+
+Проверим работоспособность с помощью команды:
+    ydb \
+    --endpoint $YDB_ENDPOINT \
+    --database $YDB_DATABASE \
+    --sa-key-file serverless-shortener.sa \
+    discovery whoami \
+    --groups
+
+
+С помощью CLI создадим авторизованный ключ сервисного аккаунта serverless-shortener:
+    yc iam key create \
+    --service-account-name serverless-shortener \
+    --output serverless-shortener.sa
+
+id: aje8jt4fasf9es1lmbhf
+service_account_id: ajeu5f3s3s3f97c988dg
+created_at: "2022-02-24T10:41:06.917685284Z"
+key_algorithm: RSA_2048
+
+
+# Для дальнейшей работы нам понадобится утилита ydb:
+curl https://storage.yandexcloud.net/yandexcloud-ydb/install.sh | bash
+
+Сразу получим и сохраним значение endpoint и database в значение переменной YDB_ENDPOINT (обычно это ydb.serverless.yandexcloud.net:2135 ) и YDB_DATABASE. Они пригодятся нам для подключения функции. В выводе следующей команды есть значение endpoint, оно обычно состоит из:
+    yc ydb database get --name for-serverless-shortener
+
+    echo "export YDB_ENDPOINT=ydb.serverless.yandexcloud.net:2135" >> ~/.bashrc && . ~/.bashrc
+    echo $YDB_ENDPOINT
+
+    echo "export YDB_DATABASE=/ru-central1/b1ghaq177q6g5noa48fh/etnbd2pmnrpo1lein1ue" >> ~/.bashrc && . ~/.bashrc
+    echo $YDB_DATABASE
+
+
+ yc ydb database list
++----------------------+--------------------------+-------------+--------------------------------------------------------------------------------------------------------------+---------------------+---------+
+|          ID          |           NAME           | DESCRIPTION |                                                   ENDPOINT                                                   |     CREATED AT      | STATUS  |
++----------------------+--------------------------+-------------+--------------------------------------------------------------------------------------------------------------+---------------------+---------+
+| etnbd2pmnrpo1lein1ue | for-serverless-shortener |             | grpcs://ydb.serverless.yandexcloud.net:2135/?database=/ru-central1/b1ghaq177q6g5noa48fh/etnbd2pmnrpo1lein1ue | 2022-02-23 11:48:27 | RUNNING |
+
+
+Создадим бессерверную базу данных YDB с именем for-serverless-shortener. Чтобы не переключаться из терминала, снова воспользуемся CLI. Обязательно укажите флаг --serverless для выбора типа создаваемой базы данных:
+    yc ydb database create for-serverless-shortener --serverless --folder-id $FOLDER_ID
+    yc ydb database list
+
+# Шаг 3. Создание базы в Yandex Database #
+
+storage-for-serverless-shortener74
+## Шаг 2. Создание бакета в Object Storage ###
+
+    echo "export FOLDER_ID=$(yc config get folder-id)" >> ~/.bashrc && . ~/.bashrc
+    echo $FOLDER_ID
+
+    echo "export OAUTH_TOKEN=$(yc config get token)" >> ~/.bashrc && . ~/.bashrc
+    echo $OAUTH_TOKEN
+
+    echo "export CLOUD_ID=$(yc config get cloud-id)" >> ~/.bashrc && . ~/.bashrc
+    echo $CLOUD_ID
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_SHORTENER_ID \
+    --role editor
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_SHORTENER_ID \
+    --role ydb.admin
+
+    yc resource-manager folder add-access-binding $FOLDER_ID \
+    --subject serviceAccount:$SERVICE_ACCOUNT_SHORTENER_ID \
+    --role storage.viewer
+
+# Назначение роли сервисному аккаунту
+
+echo "export SERVICE_ACCOUNT_SHORTENER_ID=ajeu5f3s3s3f97c988dg" >> ~/.bashrc && . ~/.bashrc
+echo $SERVICE_ACCOUNT_SHORTENER_ID
+
+Создайте сервисный аккаунт с именем serverless-shortener:
+    export SERVICE_ACCOUNT_SHORTENER_ID=$(yc iam service-account create --name serverless-shortener \
+    --description "service account for serverless" \
+    --format json | jq -r .)
+
+# Шаг 1. Создание Service Account
+
+#### Практическая работа. Сокращатель ссылок
+# 2022.02.23===

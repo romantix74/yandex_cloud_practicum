@@ -1,0 +1,165 @@
+
+yc serverless function logs my-trigger-function
+
+# Чтобы создать триггер my-first-trigger, который вызывает функцию my-trigger-function, при создании нового объекта в бакете BUCKET_NAME выполните команду:
+yc serverless trigger create object-storage \
+--name my-first-trigger \
+--bucket-id $BUCKET_NAME \
+--events 'create-object' \
+--invoke-function-name my-trigger-function \
+--invoke-function-service-account-id $SERVICE_ACCOUNT_ID
+
+-- Создание триггера ---
+
+# Находясь в каталоге с файлом index.py вызовите следующие команды:
+yc serverless function create --name my-trigger-function
+
+yc serverless function version create \
+--function-name my-trigger-function \
+--memory 256m \
+--execution-timeout 5s \
+--runtime python37 \
+--entrypoint index.handler \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--source-path index.py
+
+yc serverless function version list --function-name my-trigger-function
+
+# Для создания триггера нам необходима функция, которую триггер будет запускать. Аналогично предыдущему шагу создадим функцию my-trigger-function и её версию на основе файла index.py.
+def handler(event, context):
+    print("\U0001F4C2 Starting function after trigger")
+    print(event)
+    return {
+        'statusCode': 200,
+        'body': 'File is uploaded',
+    }
+--- Шаг 4. Создание триггера ---
+
+yc serverless function get my-first-function
+
+id: d4enqssu7ngj0u8g6gn6
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-15T07:05:02.628Z"
+name: my-first-function
+log_group_id: ckggjbg7pesrjkrdm6cv
+http_invoke_url: https://functions.yandexcloud.net/d4enqssu7ngj0u8g6gn6
+status: ACTIVE
+
+
+
+# вызов
+yc serverless function invoke d4enqssu7ngj0u8g6gn6
+
+yc serverless function list
+yc serverless function version list --function-name my-first-function
+
+# Создадим новую версию функции, задав при этом переменные окружения. Для этого выставим значение переменной source-version-id равному полученному ID в следующей команде:
+yc serverless function version create \
+--function-name my-first-function \
+--memory 256m \
+--execution-timeout 5s \
+--runtime python37 \
+--entrypoint index.handler \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--source-version-id d4eqtsjth6ob0hskok53 \
+--environment ACCESS_KEY=$ACCESS_KEY \
+--environment SECRET_KEY=$SECRET_KEY \
+--environment BUCKET_NAME=$BUCKET_NAME
+
+# Определим значение ID для последней загруженной версии функции:
+yc serverless function version list --function-name my-first-function
+
++----------------------+----------------------+----------+---------------+---------+---------------------+
+|          ID          |     FUNCTION ID      | RUNTIME  |  ENTRYPOINT   |  TAGS   |     CREATED AT      |
++----------------------+----------------------+----------+---------------+---------+---------------------+
+| d4eqtsjth6ob0hskok53 | d4enqssu7ngj0u8g6gn6 | python37 | index.handler | $latest | 2022-02-15 10:11:02 |
+| d4ee3d8if8l42a19kr7q | d4enqssu7ngj0u8g6gn6 | python37 | index.handler | first   | 2022-02-15 07:06:40 |
++----------------------+----------------------+----------+---------------+---------+---------------------+
+
+
+echo "export ACCESS_KEY=SF6Nl3uPH7Oi3YxKnPnB" >> ~/.bashrc && . ~/.bashrc
+echo "export SECRET_KEY=35aoVpqFYXKjZ6n4_-_4zXpPQ3QAfQznITaO2T-d" >> ~/.bashrc && . ~/.bashrc
+echo "export BUCKET_NAME=bucket-for-trigger74" >> ~/.bashrc && . ~/.bashrc
+
+yc serverless function version create \
+--function-name my-first-function \
+--memory 256m \
+--execution-timeout 5s \
+--runtime python37 \
+--entrypoint index.handler \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--source-path my-first-function.zip
+
+
+# Для создания ключа доступа необходимо вызвать следующую команду:
+yc iam access-key create --service-account-name service-account-for-cf
+
+access_key:
+  id: ajegnrss4lb2919ubd3b
+  service_account_id: ajemv4m92ghpc61v5q87
+  created_at: "2022-02-15T08:54:16.566504689Z"
+  key_id: SF6Nl3uPH7Oi3YxKnPnB
+secret: 35aoVpqFYXKjZ6n4_-_4zXpPQ3QAfQznITaO2T-d
+
+
+yc resource-manager folder add-access-binding $FOLDER_ID \
+    --role storage.editor \
+    --subject serviceAccount:$SERVICE_ACCOUNT_ID
+------Практическая работа. Создание триггера от Object Storage ----
+
+
+# Чтобы удалить тег, используйте аргумент remove-tag, например:
+yc serverless function version remove-tag --id d4eo8lebmtb2htspslpp --tag first
+
+
+yc serverless function version set-tag --id d4ee3d8if8l42a19kr7q --tag first
+----- версионирование ---
+
+# получаем http_invoke_url
+yc serverless function get my-first-function
+
+# сделать публичной
+yc serverless function allow-unauthenticated-invoke my-first-function
+
+# вызов функции
+yc serverless function invoke d4enqssu7ngj0u8g6gn6
+
+yc serverless function list
+yc serverless function version list --function-name my-first-function
+
+# Находясь в директории с файлом index.py, вызовите приведённую ниже команду. Это позволит вам загрузить код функции в облако и создать её версию:
+yc serverless function version create \
+    --function-name my-first-function \
+    --memory 256m \
+    --execution-timeout 5s \
+    --runtime python37 \
+    --entrypoint index.handler \
+    --service-account-id $SERVICE_ACCOUNT_ID \
+    --source-path index.py
+
+
+yc serverless function create --name my-first-function
+------ Шаг 2. Создание и настройка функции
+
+# Добавьте вновь созданному сервисному аккаунту роль editor:
+echo "export FOLDER_ID=$(yc config get folder-id)" >> ~/.bashrc && . ~/.bashrc
+echo $FOLDER_ID
+
+yc resource-manager folder add-access-binding $FOLDER_ID \
+--subject serviceAccount:$SERVICE_ACCOUNT_ID \
+--role editor
+
+echo "export SERVICE_ACCOUNT_ID=ajemv4m92ghpc61v5q87" >> ~/.bashrc && . ~/.bashrc
+echo $SERVICE_ACCOUNT_ID
+===2022.02.15===
+
+# список сервисных аккаунтов
+yc iam service-account list
+echo $SERVICE_ACCOUNT
+
+# создаем аккаунт
+export SERVICE_ACCOUNT=$(yc iam service-account create --name service-account-for-cf \
+--description "service account for cloud functions" \
+--format json | jq -r .)
+
+===2022.02.14===

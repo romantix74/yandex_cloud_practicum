@@ -1,0 +1,66 @@
+Document API
+В бессерверном режиме работы Yandex Database поддерживает Document API — HTTP API, совместимое с Amazon DynamoDB. Это низкоуровневый API для работы с таблицами и созданием, чтением, изменением и удалением данных. С помощью этого API можно выполнять операции над документными таблицами, совместимыми с AWS DynamoDB.
+
+--- Document API ---
+
+# Для тестирования вызовем функцию в браузере сначала без параметра secret, а затем — с ним:
+   https://<ID API Gateway>.apigw.yandexcloud.net/results
+    https://d5don9ocahguqcvu5t6m.apigw.yandexcloud.net/results?secret=cecfb23c-bc86-4ca2-b611-e79bc77e5c31
+
+# Вызовем перезагрузку нашей спецификации:
+    yc serverless api-gateway update \
+    --name hello-world \
+    --spec=hello-world.yaml
+
+    yc serverless function create \
+    --name  function-for-user-requests \
+    --description "function for respons to user"
+
+    yc serverless function version create \
+    --function-name=function-for-user-requests \
+    --memory=256m \
+    --execution-timeout=5s \
+    --runtime=python37 \
+    --entrypoint=function-for-user-requests.handler \
+    --service-account-id $SERVICE_ACCOUNT_ID \
+    --environment VERBOSE_LOG=True \
+    --environment CONNECTION_ID=$CONNECTION_ID \
+    --environment DB_USER=$DB_USER \
+    --environment DB_HOST=$DB_HOST \
+    --source-path function-for-user-requests.py
+
+# test
+https://d5don9ocahguqcvu5t6m.apigw.yandexcloud.net/hello
+https://d5don9ocahguqcvu5t6m.apigw.yandexcloud.net/hello?user=my_user
+
+# В результате успешного создания API-шлюза получим domain:
+    yc serverless api-gateway list
+    yc serverless api-gateway get --name hello-world
+
+id: d5don9ocahguqcvu5t6m
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-16T10:11:37.714Z"
+name: hello-world
+description: hello world
+status: ACTIVE
+domain: d5don9ocahguqcvu5t6m.apigw.yandexcloud.net
+log_group_id: ckgh7va081nlnjef3a7l
+
+
+
+yc serverless api-gateway create \
+--name hello-world \
+--spec=hello-world.yaml \
+--description "hello world"
+
+-- practicum ----
+
+Здесь <Путь> — путь строки вызова после домена, <Метод> — метод вызова (например, get), <Тип расширения> — один из четырех типов расширений, который указывает на действия при вызове по данному пути:
+dummy — статический ответ;
+cloud-functions — вызов функции сервиса Yandex Cloud Functions;
+http — отправка HTTP-запроса;
+object-storage — обращение к сервису Yandex Object Storage.
+
+API Gateway использует спецификацию OpenAPI 3.0 для конфигурации вызовов и ответов
+
+===2022.02.16===

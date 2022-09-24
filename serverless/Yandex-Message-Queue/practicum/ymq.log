@@ -1,0 +1,131 @@
+
+По завершении лабораторной работы не забудьте удалить созданный вами триггер trigger-for-mq, иначе он будет работать, пока не исчерпает деньги на аккаунте:
+	yc serverless trigger delete trigger-for-mq
+
+# Теперь у нас есть функция, которая раз в минуту будет пробовать взять из очереди URL
+# и проверить его. Также есть метод REST API, который позволяет записывать URL
+# в очередь независимо от работы обработчика.
+# Мы можем вызывать созданный метод как угодно часто.
+# Очередь будет просто накапливаться, а затем обработчик будет постепенно её разбирать.
+# -----  Удаление триггера-таймера -----
+
+# Создадим триггер, который будет вызывать функцию обработки сообщений из очереди
+# один раз в минуту.
+# Он будет использовать cron-выражение:\
+
+yc serverless trigger create timer \
+--name trigger-for-mq \
+--invoke-function-name function-for-url-from-mq \
+--invoke-function-service-account-id $SERVICE_ACCOUNT_ID \
+--cron-expression '* * * * ? *'
+
+id: a1siq0fugn8ljjgrsr5p
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-17T08:10:44.907684730Z"
+name: trigger-for-mq
+rule:
+  timer:
+    cron_expression: '* * * * ? *'
+    invoke_function_with_retry:
+      function_id: d4ed8ubb96mknm8irun2
+      function_tag: $latest
+      service_account_id: ajemv4m92ghpc61v5q87
+status: ACTIVE
+
+
+# ----  Шаг 6. Создание триггера ------
+
+После её выполнения количество сообщений в очереди уменьшится,
+а в базе данных появится новая таблица с результатами тестирования доступности функции.
+
+# При создании сразу задайте все необходимые переменные и сервисный аккаунт:
+    zip function-for-url-from-mq function-for-url-from-mq.py requirements.txt
+
+    yc serverless function create \
+    --name function-for-url-from-mq \
+    --description "function for url from mq"
+
+    yc serverless function version create \
+    --function-name=function-for-url-from-mq \
+    --memory=256m \
+    --execution-timeout=5s \
+    --runtime=python37 \
+    --entrypoint=function-for-url-from-mq.handler \
+    --service-account-id $SERVICE_ACCOUNT_ID \
+    --environment VERBOSE_LOG=True \
+    --environment CONNECTION_ID=$CONNECTION_ID \
+    --environment DB_USER=$DB_USER \
+    --environment DB_HOST=$DB_HOST \
+    --environment AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+    --environment AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+    --environment QUEUE_URL=$QUEUE_URL \
+    --source-path function-for-url-from-mq.zip
+
+
+# Создадим функцию function-for-url-from-mq.py и воспользуемся командой
+	pipreqs $PWD --force
+, чтобы сформировать для нее файл requirements.txt.
+
+
+# В предыдущих работах мы создавали функцию, использующую подключение к БД. Здесь мы повторим этот опыт.
+# ---  Шаг 5. Создание функции для чтения из очереди
+
+Для тестирования выполните вызов функции в браузере:
+https://d5don9ocahguqcvu5t6m.apigw.yandexcloud.net/check?url=https://ya.ru/
+# ничего не выходит ,  но счетчик в очереди увеличивается
+
+
+# Обновите конфигурацию:
+yc serverless api-gateway update \
+--name hello-world \
+--spec=hello-world-new.yaml
+
+# Функция готова, но по умолчанию она не является публичной.
+# Предоставим доступ к ней с помощью API-шлюза.
+# Для этого необходимо обновить ранее созданную спецификацию hello-world.yaml.
+# Если у вас нет её под рукой, выгрузите её из облака:
+	yc serverless api-gateway get-spec \
+--name hello-world >> hello-world-new.yaml
+-- Шаг 4. Обновление спецификации API Gateway ----
+
+При этом сразу задайте все необходимые переменные и сервисный аккаунт:
+    zip my-url-receiver-function my-url-receiver-function.py requirements.txt
+
+    yc serverless function create \
+    --name  my-url-receiver-function \
+    --description "function for url"
+
+    yc serverless function version create \
+    --function-name=my-url-receiver-function \
+    --memory=256m \
+    --execution-timeout=5s \
+    --runtime=python37 \
+    --entrypoint=my-url-receiver-function.handler \
+    --service-account-id $SERVICE_ACCOUNT_ID \
+    --environment VERBOSE_LOG=$VERBOSE_LOG \
+    --environment AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+    --environment AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+    --environment QUEUE_URL=$QUEUE_URL \
+    --source-path my-url-receiver-function.zip
+
+воспользуйтесь командой
+	pipreqs $PWD --force
+для формирования файла requirements.txt
+
+
+# создание функции
+echo "export VERBOSE_LOG=True" >> ~/.bashrc && . ~/.bashrc
+echo "export AWS_ACCESS_KEY_ID=SF6Nl3uPH7Oi3YxKnPnB" >> ~/.bashrc && . ~/.bashrc
+echo "export AWS_SECRET_ACCESS_KEY=35aoVpqFYXKjZ6n4_-_4zXpPQ3QAfQznITaO2T-d" >> ~/.bashrc && . ~/.bashrc
+echo "export QUEUE_URL=https://message-queue.api.cloud.yandex.net/b1ghaq177q6g5noa48fh/dj60000000053lo302ae/my-first-queue" >> ~/.bashrc && . ~/.bashrc
+
+
+# использую сервисный аккаунт
+service-account-for-cf
+
+  access_key = "SF6Nl3uPH7Oi3YxKnPnB"
+  secret_key = "35aoVpqFYXKjZ6n4_-_4zXpPQ3QAfQznITaO2T-d"
+
+https://message-queue.api.cloud.yandex.net/b1ghaq177q6g5noa48fh/dj60000000053lo302ae/my-first-queue
+
+# создали вручную через веб очередь

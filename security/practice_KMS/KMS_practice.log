@@ -1,0 +1,35 @@
+
+yc kms symmetric-crypto decrypt --id abjmi5uj71lifn8s4u4p --ciphertext-file encrypted.txt --plaintext-file decrypted.txt
+
+yc kms symmetric-crypto encrypt --id abjmi5uj71lifn8s4u4p --plaintext-file plain.txt --ciphertext-file encrypted_with_new_key.txt
+Зашифруйте исходный файл plain.txt с помощью новой версии ключа. Результат запишите в файл encrypted_with_new_key.txt.
+--- Шаг 6 ---
+
+
+Провести ротацию ключа можно и из командной строки. Для этого используется команда:
+yc kms symmetric-key rotate <ID ключа>
+
+Запланируйте удаление первой версии ключа. Для этого в списке версий выберите пункт … в строке с этой версией,
+а затем нажмите кнопку Запланировать удаление.
+
+--- Шаг 5 ----
+
+
+Создайте новую версию ключа. Для этого перейдите на страницу детальной информации о ключе и нажмите кнопку Ротировать. Новая версия ключа появится в списке версий и станет основной (Primary). Обратите внимание, что идентификаторы версий отличаются друг от друга.
+--- Шаг 4 ---
+
+Теперь расшифруйте этот файл, а результат операции выведите в файл decrypted.txt. Для этого выполните команду:
+	yc kms symmetric-crypto decrypt --id abjmi5uj71lifn8s4u4p --ciphertext-file encrypted.txt --plaintext-file decrypted.txt
+--- Шаг 3 ---
+
+	yc kms symmetric-crypto encrypt --id abjmi5uj71lifn8s4u4p --plaintext-file plain.txt --ciphertext-file encrypted.txt
+
+Создайте у себя на диске файл (например, текстовый файл с именем plain.txt).
+Добавьте в него любой текст и сохраните содержимое. Напомним, что размер файла не должен превышать 32 килобайта.
+--- Шаг 2 ---
+
+Перейдите в панель управления Yandex.Cloud, нажмите кнопку Создать ресурс и выберите из выпадающего списка пункт Ключ шифрования.
+
+--- Шаг 1 ---
+
+### Создание и ротация ключей шифрования ####

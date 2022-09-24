@@ -1,11 +1,12 @@
 //module "mysql_managed" {
 //  source    = "./mysql_managed"
-//  token     = var.token
-//  cloud_id  = var.cloud_id
-//  folder_id = var.folder_id
+////  token     = var.token
+////  cloud_id  = var.cloud_id
+////  folder_id = var.folder_id
 //  zone      = var.zone
 //
 //}
+
 resource "yandex_mdb_mysql_cluster" "my-mysql" {
   name               = "my-mysql"
   environment        = "PRESTABLE"
@@ -15,7 +16,7 @@ resource "yandex_mdb_mysql_cluster" "my-mysql" {
 
   resources {
     resource_preset_id = "s2.micro"
-    disk_type_id       = "network-ssd"
+    disk_type_id       = "network-hdd"
     disk_size          = 20
   }
 

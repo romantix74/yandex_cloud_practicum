@@ -1,0 +1,67 @@
+# сделаем публичной
+yc serverless function allow-unauthenticated-invoke parrot
+
+# Создадим новую версию функции, задав переменные окружения. Для этого выставим значение переменной source-version-id равному полученному ID в следующей команде:
+yc serverless function version create \
+--function-name parrot \
+--memory 256m \
+--execution-timeout 5s \
+--runtime python37 \
+--entrypoint parrot.handler \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--source-version-id d4e12rjbskcrvc0fivt9 \
+--environment ACCESS_KEY=$ACCESS_KEY \
+--environment SECRET_KEY=$SECRET_KEY \
+--environment BUCKET_NAME=$BUCKET_NAME
+
+# Определим значение ID для последней загруженной версии функции:
+yc serverless function version list --function-name parrot
+
++----------------------+----------------------+----------+----------------+---------+---------------------+
+|          ID          |     FUNCTION ID      | RUNTIME  |   ENTRYPOINT   |  TAGS   |     CREATED AT      |
++----------------------+----------------------+----------+----------------+---------+---------------------+
+| d4e12rjbskcrvc0fivt9 | d4es03j153nn23luuqev | python37 | parrot.handler | $latest | 2022-02-15 11:26:23 |
++----------------------+----------------------+----------+----------------+---------+---------------------+
+
+
+yc serverless function version create \
+--function-name=parrot \
+--memory=256m \
+--execution-timeout=5s \
+--runtime=python37 \
+--entrypoint=parrot.handler \
+--service-account-id $SERVICE_ACCOUNT_ID \
+--source-path parrot.zip
+
+id: d4e12rjbskcrvc0fivt9
+function_id: d4es03j153nn23luuqev
+created_at: "2022-02-15T11:26:23.809Z"
+runtime: python37
+entrypoint: parrot.handler
+resources:
+  memory: "268435456"
+execution_timeout: 5s
+service_account_id: ajemv4m92ghpc61v5q87
+image_size: "14618624"
+status: ACTIVE
+tags:
+- $latest
+log_group_id: ckgj83smsm0132e765io
+
+
+
+yc serverless function create \
+    --name  parrot \
+    --description "function for Alice"
+
+id: d4es03j153nn23luuqev
+folder_id: b1g7s2jj07pt6rc3i44m
+created_at: "2022-02-15T11:22:49.192Z"
+name: parrot
+description: function for Alice
+log_group_id: ckgj83smsm0132e765io
+http_invoke_url: https://functions.yandexcloud.net/d4es03j153nn23luuqev
+status: ACTIVE
+
+
+---- Практическая работа. Навык Алисы -----

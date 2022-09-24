@@ -1,0 +1,74 @@
+grafana
+http://62.84.125.111:9090
+
+
+$ export IAM_TOKEN=CggaATEVAgA...
+curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${IAM_TOKEN}" \
+    -d '@body.json' \
+    'https://monitoring.api.cloud.yandex.net/monitoring/v2/data/write?folderId=b1g7s2jj07pt6rc3i44m&service=custom' > output.json
+
+
+curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${IAM_TOKEN}" \
+'https://monitoring.api.cloud.yandex.net/monitoring/v2/data/write?folderId=b1g7s2jj07pt6rc3i44m&service=custom'
+
+
+# по моему. Не работало через регистри7
+docker run -it -p 9090:9090 --name prom --rm my-prom
+
+
+# Теперь отправьте образ в ваше хранилище в облаке:
+docker push cr.yandex/crpv26585uggfofucjn4/my-prometheus:latest
+
+# Аутентифицируйтесь в Yandex Container Registry с помощью Docker Credential helper (чтобы Docker мог от вашего имени отправить образ в ваш реестр):
+# !  у меня уже сделано
+yc container registry configure-docker
+
+
+# Создайте образ с вашей конфигурацией (используйте ваш идентификатор в Yandex Container Registry):
+docker build . -t cr.yandex/crpv26585uggfofucjn4/my-prometheus:latest -f Dockerfile
+
+# Dockerfile
+
+FROM prom/prometheus
+ADD prometheus.yml /etc/prometheus/
+
+# ключ для сервисного аккаунта
+yc iam api-key list -service-account-name test-user
+
+yc iam api-key create --service-account-name test-user > api-key.yaml
+
+==== 2022.02.11====
+
+
+sudo ./unified_agent --config config.yml
+
+scp config.yaml ua-user@84.201.135.153:config.yml
+
+
+ua_version=$(curl -s https://storage.yandexcloud.net/yc-unified-agent/latest-version) bash -c 'curl -s -O https://storage.yandexcloud.net/yc-unified-agent/releases/$ua_version/unified_agent && chmod +x ./unified_agent'
+--- linux vm monitoring ---
+
+curl -X POST \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${IAM_TOKEN}" \
+    -d '@my-metrics.json' \
+'https://monitoring.api.cloud.yandex.net/monitoring/v2/data/write?folderId=b1g7s2jj07pt6rc3i44m&service=custom'
+
+
+yc iam create-token
+t1.9euelZqKyZSck5iSx5GYx42Zi8_Ole3rnpWam8mdkpyTlMmXic_IyZqRnZjl8_cbLmxv-e8ZZCQS_d3z91tcaW_57xlkJBL9.p1l-EzfW_rZlyebfFf9PRVfiRiceNMaWYIdGUFQFc3zyfZVSNN3xruhx6K_rMccV1HuHQqjwLWk_1EgDT8K6AQ
+export IAM_TOKEN=t1.9euelZqKyZSck5iSx5GYx42Zi8_Ole3rnpWam8mdkpyTlMmXic_IyZqRnZjl8_cbLmxv-e8ZZCQS_d3z91tcaW_57xlkJBL9.p1l-EzfW_rZlyebfFf9PRVfiRiceNMaWYIdGUFQFc3zyfZVSNN3xruhx6K_rMccV1HuHQqjwLWk_1EgDT8K6AQ
+
+IAM_TOKEN=$(yc iam create-token)
+--- часть по внешним метрикам --
+
+while true; do wget -q -O- http://practicum-20210913.storage.yandexcloud.net/site.html; done
+
+
+http://practicum-20210913.storage.yandexcloud.net/site.html
+
+==2022.02.10===

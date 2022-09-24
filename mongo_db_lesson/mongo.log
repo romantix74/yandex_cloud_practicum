@@ -1,0 +1,56 @@
+yc managed-mongodb cluster delete --name test
+
+
+mongo --norc \
+        --ssl \
+        --sslCAFile /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt \
+        --host 'rs01/rc1c-1462guo738pdkna1.mdb.yandexcloud.net:27018' \
+        -u "user1" \
+        -p "user1user1" \
+        db1
+
+yc managed-mongodb cluster create \
+   --name test \
+   --environment=production \
+   --network-name default \
+   --host zone-id=ru-central1-c,subnet-id=b0cot5queegmqtraqvg1,assign-public-ip=true \
+   --mongod-resource-preset b2.nano \
+   --user name=user1,password=user1user1 \
+   --database name=db1 \
+   --mongod-disk-type network-hdd \
+   --mongod-disk-size 10
+===2021.11.14===
+
+Порт для подключения — 27018.
+
+mongo --norc \
+        --ssl \
+        --sslCAFile /usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt \
+        --host 'rs01/rc1c-0yehzs65c1ygzrnt.mdb.yandexcloud.net:27018' \
+        -u user1 \
+        -p user1user1 \
+        db1
+
+
+yc managed-mongodb cluster update \
+   --name test \
+   --host zone-id=ru-central1-c,subnet-id=b0cot5queegmqtraqvg1,assign-public-ip \
+   --mongod-resource-preset b2.nano \
+   --user name=user1,password=user1user1 \
+   --database name=db1 \
+   --mongod-disk-type network-hdd \
+   --mongod-disk-size 10
+  
+
+yc managed-mongodb cluster create \
+   --name test \
+   --environment=production \
+   --network-name default \
+   --host zone-id=ru-central1-c,subnet-id=b0cot5queegmqtraqvg1 \
+   --mongod-resource-preset b2.nano \
+   --user name=user1,password=user1user1 \
+   --database name=db1 \
+   --mongod-disk-type network-hdd \
+   --mongod-disk-size 10
+   
+====2021.11.03===
