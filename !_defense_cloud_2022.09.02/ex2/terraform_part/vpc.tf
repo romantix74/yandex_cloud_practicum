@@ -13,4 +13,5 @@ resource "yandex_vpc_subnet" "remotesubnet" {
   zone           = var.net_cidr[count.index].zone
   v4_cidr_blocks = [var.net_cidr[count.index].prefix]
   network_id     = yandex_vpc_network.network-remote-office.id
+  folder_id = yandex_resourcemanager_folder.for_ipsec_folder.id
 }

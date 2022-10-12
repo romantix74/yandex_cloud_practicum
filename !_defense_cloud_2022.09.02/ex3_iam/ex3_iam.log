@@ -1,0 +1,56 @@
+Добавьте пользователей, указав адреса их электронной почты (
+subzero@yp-lab.edu, jcage@yp-lab.edu, scorpion@yp-lab.edu, sblade@yp-lab.edu).
+
+# federation  IDP
+bpf8br3um2scijfcii4r
+
+IdP Issuer
+https://dc01.yp-lab.edu:8443/realms/labs
+
+Ссылка на страницу для входа в IdP
+https://dc01.yp-lab.edu:8443/realms/labs/protocol/saml
+
+#Cформируйте ссылку для входа в консоль управления облаком.
+https://console.cloud.yandex.ru/federations/bpf8br3um2scijfcii4r
+
+----------------------------------------
+
+Подключение к Keycloak
+Для настройки федерации вам понадобится подключиться к серверу Keycloak. В общем случае ссылка для подключения к серверу Keycloak имеет вид:
+https://<keycloak_vm_name>.<domain_name>:<keycloack_port>
+
+# WS
+ ssh sles@62.84.114.12 -i pt_key.pem
+ vncserver -geometry 1200x800 -depth 32 -name remote-desktop :1
+
+
+ssh -i pt_key.pem  yc-user@178.154.222.120 cat /tmp/default_passwords.txt
+
+MYSQL_USER=opencart
+MYSQL_PASS=OSo5LVR6IsJY2
+MYSQL_ROOT_PASS=X3wfLlk45HGx5
+MYSQL_DB=opencart
+
+
+
+keycloak_address = "178.154.206.183"
+
+after_install = "to finish your installation of opencart follow instrucions https://cloud.yandex.ru/docs/solutions/internet-store/opencart#configure-opencart . Yo
+u can view your default_passwords.txt file by putting this command ssh -i pt_key.pem -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null yc-user@178.154.222.120 cat /tmp/default_passwords.txt"
+keycloak_address = "178.154.206.183"
+keycloak_name = "dc01"
+public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4ghGUzN+VcCcmXoK3b0Gma7o75VotonY04e4XM3SDo6ZJEkajptoJGMWeD9EkZgWCDxG3bLAAOf+wyJbQMO20rVGEnAjt5ywQq9vgkVkGiLg3
+oGVldsTI4WPofxdIfWoaTYc2j5k0p2oKO8VxKGtgVDZHvicuvmQGRHecoCcANaG2guwRvGugXonxpTXf5g/XeCBYzsumreqpV8fuV5cSqVKaQGN4PZO023rgY1wRjAzBMeY/+qks4PryvdgkVFO1pL8P/ROYZ2yCpaHZykP7L19ldjICsvl1NgPO7dkjOHRG/rhIWcmAT91UhjychnqssFBqArwnUWL2BcyBC0gd"
+ws_address = "62.84.114.12"
+ws_name = "ws"
+
+===2022.09.28===
+
+Управление доступом в Yandex Cloud построено на подходе RBAC (Role-Based Access Control — управление доступом на основе ролей).
+Роль — это набор разрешений, которые описывают допустимые операции над ресурсом. После назначения пользователю роли на ресурс он сможет выполнять с ним заданный набор операций.
+В используемой модели роли делятся на две группы: примитивные и сервисные.
+Примитивные (admin, editor и viewer) содержат разрешения для всех типов ресурсов Yandex Cloud.
+Сервисные — только для определённого типа ресурсов в конкретном сервисе. Например, в Key Management Service
+предусмотрены роли kms.admin и kms.keys.encrypterDecrypter, то есть администратора и пользователя ключей шифрования.
+
+# Ролевая модель и управление доступом

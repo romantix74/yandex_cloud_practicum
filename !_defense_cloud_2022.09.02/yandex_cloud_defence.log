@@ -1,0 +1,141 @@
+Аутентификация с помощью Keycloak
+==2022.09.26===
+
+Механизм работы VPN:
+Перед созданием туннеля узлы идентифицируют друг друга, чтобы удостовериться, что шифрованные данные
+будут отправлены на нужный узел.
+На обоих узлах заранее определяется, какие протоколы будут использоваться для шифрования и
+обеспечения целостности данных.
+Узлы сверяют настройки, чтобы договориться об используемых алгоритмах. Если настройки разные,
+туннель не создаётся.
+Если сверка прошла успешно, то создаётся ключ, который используется для симметричного шифрования.
+
+
+-----------------------------------
+
+	Напомним:
+	Сервер идентификации пользователей не должен иметь доступа в интернет, а доступ к нему может осуществляться только из корпоративной или облачной сети.
+	Для рабочих станций пользователей нужен доступ в интернет.
+	Для интернет-магазина должен быть разрешен исходящий трафик в интернет и входящий трафик по протоколу HTTPS.
+
+
+Группы безопасности не блокируют отправку трафика на адреса сервисов, необходимых для работы виртуальных машин и виртуальной сети:
+сервера метаданных — 169.254.169.254;
+DNS-серверы — второй по порядку внутренний IP-адрес (обычно x.x.x.2) в каждой подсети.
+
+Исключение составляют случаи, когда для ВМ, сети, подсети или каталога активирована опция Superflows.
+Она служит для агрегирования TCP и UDP соединений в группы и, таким образом, позволяет увеличивать лимит
+ на количество соединений. Эта опция активируется через техническую поддержку или аккаунт-менеджера.
+ Если она включена, то вам может понадобиться разрешить трафик на сервер метаданных и DNS-серверы
+ в явном виде.
+
+На один сетевой интерфейс можно назначить несколько групп безопасности
+(в рамках изначальной квоты не более пяти - можно увеличить по запросу в поддержку).
+-------------------------------------------------------------------------------------------------
+
+# WS ssh
+ssh -i pt_key.pem -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null sles@130.193.48.27
+vncserver -geometry 1200x800 -depth 32 -name remote-desktop :1
+
+VNC pass = { opencart pass }
+
+# opencart
+admin
+eo1GRvqFQP
+
+ssh -i pt_key.pem -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null yc-user@178.154.206.170 cat /tmp/default_passwords.txt
+
+MYSQL_USER=opencart
+MYSQL_PASS=d98LAvb3dDv9N
+MYSQL_ROOT_PASS=2fJpytJ935vCj
+MYSQL_DB=opencart
+
+
+"keycloak_address = "178.154.205.13"
+keycloak_name = "dc01"
+public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDmPtJDaOYFRyZokcOT0hwci67tCjQQo3vHlbScuMGHWunv7zDv9/R0RVjDaw8bKgvnAOWy/wgm/exOMKHl1rZiJ5mBv6COyKcOSS6GMm6RXHHbqyLVbGg+Tv7z3gXoINJdc0qTvrK261QMy56wWgSP7NX/OKshZ8E33PQypoUKRKkEceIwq4EQj8EVMDTuU0yiMObv0oscoowgGWCuvSWvShvM4Pu+NQwdqG2spfV8+Juy1+zuVH587WSQzKAHHMxf14Y7yCyqor1DSKYUHuIb7LCWK7FQpeESJf1PuJ+LnLUZJmzf75j3zL/glLele/5hnJsrOZcjHcMjb6mB6ez"
+ws_address = "130.193.48.27"
+ws_name = "ws"
+
+===2022.09.12====
+
+MYSQL_USER=opencart
+MYSQL_PASS=dnBnJ2r4RHMwF
+MYSQL_ROOT_PASS=WleQJSeEaHC3T
+MYSQL_DB=opencart
+
+
+after_install = "to finish your installation of opencart follow instrucions
+ https://cloud.yandex.ru/docs/solutions/internet-store/opencart#configure-opencart .
+ You can view your default_passwords.txt file by putting this command 
+ssh -i pt_key.pem -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null yc-user@51.250.93.252 cat /tmp/default_passwords.txt"
+keycloak_address = "62.84.112.187"
+keycloak_name = "dc01"
+public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxoX6cyBl9ZAgfQPG1gVgp/aFA9ZWS5L4TwID1Mu48hdQl0ljGuHtt1MGp0ibRG9acpk4DjGRICnszk4aEcvyKYjnEIZmtMWIQBLeVKHR9u0JFj1VswwmU3QrWN3VMj+C08D58yV3l0C585gT/gJQvbxEvvdMOWAIF2x+nh/iCDTFa2DhGMIexmeP7YVzzh8SqxIpHhGlt3cyXBi4mdVCxbqN2rd+EYQK9Cw7Dfji7EO6iV86MFAYWWxxZQ6wzVdUN4PLTsMz7WbPBQ972GPxnUp2EQyaQKFtd70YsUi8F8uvFoXb2+/Coq/J7UAMd1MRY5mHTeeiauhmgKWJX/G5j"
+ws_address = "51.250.82.211"
+ws_name = "ws"
+
+
+keycloak admin pass QURgXmjq
+
+$env:YC_TOKEN="AQAAAAAGEVytAATuwbG45A6-XkQ1hI_bHh0dUz4"
+$env:YC_CLOUD_ID="b1ghaq177q6g5noa48fh"
+$env:YC_FOLDER_ID="b1g7s2jj07pt6rc3i44m" 
+
+#yc config profile activate security
+#$env:YC_TOKEN="ваш OAuth-токен"
+#$env:YC_CLOUD_ID=$(yc config get cloud-id)
+#$env:YC_FOLDER_ID=$(yc config get folder-id)
+
+yc config profile create security
+yc config set cloud-id b1ghaq177q6g5noa48fh
+yc config set folder-id b1g7s2jj07pt6rc3i44m
+yc config set token AQAAAAAGEVytAATuwbG45A6-XkQ1hI_bHh0dUz4 
+===2022.09.08===
+
+Для корректной установки ресурсов Terraform создайте в домашнем каталоге (/home/<username> — для macOS и Linux, C:\Users\<username>\AppData\Roaming — для Windows) файл .terraformrc (для Windows terraform.rc) со следующим содержимым:
+ provider_installation {
+     network_mirror {
+       url = "https://terraform-mirror.yandexcloud.net/"
+       include = ["registry.terraform.io/*/*"]
+     }
+     direct {
+       exclude = ["registry.terraform.io/*/*"]
+     }
+   }
+  
+  
+
+
+curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+==2022.09.07===
+
+Необходимо для прохождения курса "Защита облачной инфраструктуры" на платформе Яндекс.Практикума
+
+
+С точки зрения безопасности использование облака имеет свои особенности.
+К часто встречающимся уязвимостям облачных систем относят:
+- отсутствие защиты от DDoS;
+- слабые пароли;
+- назначение публичных адресов на виртуальные машины с открытыми портами;
+- отсутствие двухфакторной аутентификации;
+- избыточные права у пользователей;
+- настройка публичных бакетов в объектном хранилище;
+- администрирование ресурсов по незащищённому соединению;
+- отсутствие сбора и анализа событий безопасности.
+
+
+Рекорд — 30 минут. В 40% случаев для взлома потребовалось менее 8 часов. 
+Это значит, что публичные IP-адреса сканируются на наличие уязвимых ресурсов в автоматическом режиме.
+ То есть, вопрос заключается не в том, будет ли найдена уязвимость, а в том, насколько быстро это произойдет.
+
+Слабые пароли/отсутствие паролей для пользовательских аккаунтов, отсутствие аутентификации при использовании API — 48% случаев.
+Уязвимости в стороннем ПО — 26% случаев.
+Неправильная настройка облачных ресурсов/сервисов или стороннего ПО — 12% случаев.
+
+Три самых распространённых варианта:
+Майнинг криптовалют — 86%.
+Сканирование портов других целей — 10%.
+Проведение атак на другие цели в интернете — 8%.
+
+===2022.09.02====

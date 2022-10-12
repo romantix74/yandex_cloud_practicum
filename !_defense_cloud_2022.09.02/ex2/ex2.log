@@ -1,0 +1,67 @@
+
+sudo ipsec status
+Security Associations (1 up, 0 connecting):
+ cloud-to-hq[2]: ESTABLISHED 3 minutes ago, 10.60.1.35[84.201.156.124]...84.252.131.208[84.252.131.208]
+ cloud-to-hq{1}:  INSTALLED, TUNNEL, reqid 1, ESP in UDP SPIs: c15dc0d5_i c77da406_o
+ cloud-to-hq{1}:   10.60.1.0/24 === 10.70.1.0/24
+
+
+Перезапустите strongSwan:
+ sudo systemctl restart strongswan-starter
+
+/etc/ipsec.secrets
+84.201.156.124 84.252.131.208 : PSK "12345678cv"
+
+/etc/ipsec.conf
+conn cloud-to-hq
+     authby=secret
+     left=%defaultroute
+     leftid=84.201.156.124
+     leftsubnet=10.60.1.0/24
+     right=84.252.131.208
+     rightsubnet=10.70.1.0/24
+     ike=aes256-sha2_256-modp1024!
+     esp=aes256-sha2_256!
+     keyingtries=0
+     ikelifetime=1h
+     lifetime=8h
+     dpddelay=30
+     dpdtimeout=120
+     dpdaction=restart
+     auto=start
+
+# remote ipsec.conf
+conn cloud-to-hq
+     authby=secret
+     left=%defaultroute
+     leftid=84.252.131.208
+     leftsubnet=10.70.1.0/24
+     right=84.201.156.124
+     rightsubnet=10.60.1.0/24
+     ike=aes256-sha2_256-modp1024!
+     esp=aes256-sha2_256!
+     keyingtries=0
+     ikelifetime=1h
+     lifetime=8h
+     dpddelay=30
+     dpdtimeout=120
+     dpdaction=restart
+     auto=start
+
+ipsec.secrets
+84.252.131.208 84.201.156.124 : PSK "12345678cv"
+
+
+ Задайте следующие параметры тестового соединения:
+leftid — публичный IP-адрес IPSec-инстанса.
+leftsubnet — CIDR подсети, к которой подключен IPSec-инстанс.
+right — укажите публичный IP-адрес шлюза на другом конце VPN-туннеля.
+rightsubnet — укажите CIDR подсети, к которой подключен VPN-шлюз на другом конце VPN-туннеля.
+В параметрах ike и esp укажите алгоритмы шифрования, которые поддерживаются на удаленном шлюзе. Списки поддерживаемых алгоритмов шифрования размещены на сайте strongSwan: IKEv1 и IKEv2.
+Остальные настройки укажите, консультируясь с документацией strongSwan и учитывая настройки удалённого шлюза.
+
+===2022.09.26===
+
+$env:YC_TOKEN="AQAAAAAGEVytAATuwbG45A6-XkQ1hI_bHh0dUz4"
+$env:YC_CLOUD_ID="b1ghaq177q6g5noa48fh"
+$env:YC_FOLDER_ID="b1g7s2jj07pt6rc3i44m"

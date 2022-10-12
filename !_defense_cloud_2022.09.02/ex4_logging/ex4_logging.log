@@ -1,0 +1,210 @@
+ответ
+Значение вводите в нижнем регистре (все должно быть написано маленькими буквами).
+	yandex.cloud.audit.storage.bucketupdate
+
+Найдите событие удаления виртуальной машины opencartshop2, скопируйте название поля c именем этой ВМ и вставьте его в поле Ответ.
+
+#{"event_id":"fd849ev5cc3tvrmur6hr","event_source":"compute","event_type":"yandex.cloud.audit.compute.DeleteInstance","event_time":"2022-10-10T07:47:59.272807119Z","authentication":{"authenticated":true,"subject_type":"YANDEX_PASSPORT_USER_ACCOUNT","subject_id":"ajed6bmclk6hv076enbg","subject_name":"romantix74"},"authorization":{"authorized":true},"resource_metadata":{"path":[{"resource_type":"organization-manager.organization","resource_id":"bpfitdrtivl67cs6tns5","resource_name":"mt4irc5azss8u51v"},{"resource_type":"resource-manager.cloud","resource_id":"b1ghaq177q6g5noa48fh","resource_name":"test"},{"resource_type":"resource-manager.folder","resource_id":"b1g7s2jj07pt6rc3i44m","resource_name":"default"}]},"request_metadata":{"remote_address":"85.140.4.215","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.124 YaBrowser/22.9.2.1495 Yowser/2.5 Safari/537.36","request_id":"7e108f99-3685-4d84-a55a-18901419b9d4"},"event_status":"DONE","details":{"instance_id":"fhmabmq0q1mgi8nfghee","instance_name":"opencartshop2"}}]
+
+	yandex.cloud.audit.compute.deleteinstance
+
+3 Создайте трейл для загрузки аудитных логов в бакет Object Storage.
+yc resource-manager folder  add-access-binding \{"event_id":"fd849ev5cc3tvrmur6hr","event_source":"compute","event_type":"yandex.cloud.audit.compute.DeleteInstance","event_time":"2022-10-10T07:47:59.272807119Z","authentication":{"authenticated":true,"subject_type":"YANDEX_PASSPORT_USER_ACCOUNT","subject_id":"ajed6bmclk6hv076enbg","subject_name":"romantix74"},"authorization":{"authorized":true},"resource_metadata":{"path":[{"resource_type":"organization-manager.organization","resource_id":"bpfitdrtivl67cs6tns5","resource_name":"mt4irc5azss8u51v"},{"resource_type":"resource-manager.cloud","resource_id":"b1ghaq177q6g5noa48fh","resource_name":"test"},{"resource_type":"resource-manager.folder","resource_id":"b1g7s2jj07pt6rc3i44m","resource_name":"default"}]},"request_metadata":{"remote_address":"85.140.4.215","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.124 YaBrowser/22.9.2.1495 Yowser/2.5 Safari/537.36","request_id":"7e108f99-3685-4d84-a55a-18901419b9d4"},"event_status":"DONE","details":{"instance_id":"fhmabmq0q1mgi8nfghee","instance_name":"opencartshop2"}}]
+--role audit-trails.viewer \
+--id $(yc config get folder-id) \
+--service-account-id $sid
+
+2 Выдайте этому сервисному аккаунту права на запись в бакет …
+	yc resource-manager folder add-access-binding \
+	--role storage.uploader \
+	--id $(yc config get folder-id) --service-account-name trails
+
+и на доступ к аудитным логам, собираемым с ресурсов организации.
+	yc organization-manager organization add-access-binding \
+	--role audit-trails.viewer \
+	--id bpfitdrtivl67cs6tns5 \
+	--service-account-name trails
+
+1 Создайте отдельный сервисный аккаунт trails для работы с Audit Trails.
+	yc iam service-account create --name trails
+
+---Подключение Audit Trails---
+
+
+В консоли управления включите NAT в интернет для созданной подсети с worker-контейнером.
+В каталоге для SIEM-системы перейдите в сервис Virtual Private Cloud.
+На вкладке Облачные сети выберите сеть, которая была создана (её имя выглядит так: vpc-elk-****).
+Нажмите на кнопку … справа от подсети app-elk-a и в выпадающем меню выберите Включить NAT в интернет.
+
+terraform
+	elk-pass = <sensitive>
+	elk-user = "admin"
+	elk_fqdn = "https://c-c9qeneq0cal8d9boj3b8.rw.mdb.yandexcloud.net"
+
+terraform output elk-pass
+	bVoWVd>r%ant{0(Hh8y_
+
+
+4) Создайте для сервисного аккаунта авторизованный ключ и сохраните его в файл key.json:
+yc iam key create \
+--service-account-name lesson6 \
+--output key.json
+
+Идентификатор ключа:
+YCAJE0koJCYgAkm_AI5nw6Fe6
+Ваш секретный ключ:
+YCPtvIIpTyQaM1wjcalh-v_R49hRuKbRRgUyXmCy
+Сохраните идентификатор и ключ. После закрытия диалога значение ключа будет недоступно.
+Идентификатор ключа:
+YCAJEquO2MZKqHJMidApUBkl3
+Ваш секретный ключ:
+YCM2UfUqql-7vDWq3um7HT_9LrpmNGlx2NwFsikP
+Сохраните идентификатор и ключ. После закрытия диалога значение ключа будет недоступно.
+
+
+3)
+git clone https://github.com/yandex-cloud/yc-solution-library-for-security.git
+
+cd ./yc-solution-library-for-security/auditlogs/export-auditlogs-to-ELK_main/terraform/example/
+
+2) Назначьте этому аккаунту роль admin на каталог:
+yc resource-manager folder add-access-binding --id=$(yc config get folder-id) \
+--service-account-name lesson6 \
+--role admin
+
+1) yc iam service-account create --name lesson6
+	id: ajerl1g6ld1hskpb7j4n
+	folder_id: b1g7s2jj07pt6rc3i44m
+	created_at: "2022-10-10T07:01:27.537047650Z"
+	name: lesson6
+
+---======= ПРАКТИКА =================--------
+
+Потренируемся составлять запросы. Искать будем по типу события (event_type).
+В общем случае такой запрос выглядит следующим образом:
+json_payload.event_type="yandex.cloud.audit.<имя сервиса>.<имя события>"
+
+	json_payload.event_type="yandex.cloud.audit.iam.CreateServiceAccount"
+
+{
+  "authentication": {
+    "authenticated": true,
+    "subject_id": "ajed6bmclk6hv076enbg",
+    "subject_name": "romantix74",
+    "subject_type": "YANDEX_PASSPORT_USER_ACCOUNT"
+  },
+  "event_status": "DONE",
+  "event_id": "aje112vbc3ofec064lgp",
+  "event_source": "iam",
+  "event_time": "2022-09-29T07:56:14Z",
+  "event_type": "yandex.cloud.audit.iam.CreateServiceAccount",
+  "request_metadata": {
+    "remote_address": "109.73.13.149",
+    "request_id": "bfc23e71-bd5d-42b5-83a8-7e492bc8d80c",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.114 YaBrowser/22.9.1.1095 Yowser/2.5 Safari/537.36"
+  },
+  "resource_metadata": {
+    "path": [
+      {
+        "resource_id": "b1ghaq177q6g5noa48fh",
+        "resource_name": "test",
+        "resource_type": "resource-manager.cloud"
+      },
+      {
+        "resource_name": "default",
+        "resource_type": "resource-manager.folder",
+        "resource_id": "b1g7s2jj07pt6rc3i44m"
+      }
+    ]
+  },
+  "authorization": {
+    "authorized": true
+  },
+  "details": {
+    "service_account_name": "test-for-cloud-trail",
+    "service_account_id": "aje1oak7m8j3ldn6teck"
+  }
+}
+
+Поиск событий безопасности
+Теперь посмотрим, как всё это работает. События в облаке генерируют сообщения Audit Trails, которые записываются в логи и сохраняются в лог-группе Cloud Logging. Задача — найти интересующие нас события.
+Давайте выполним какую-либо операцию — например,
+создадим ключ для сервисного аккаунта — и найдём в логах информацию о ней.
+	Идентификатор ключа:
+		YCAJEuhnNJ4eRt4HdfkXi38h7
+	Ваш секретный ключ:
+		YCNdR4drKNlhuDJf6WnXNVyKl1nIiUbWbl--d2Qq
+	Сохраните идентификатор и ключ. После закрытия диалога значение ключа будет недоступно.
+------------------
+
+5. Убедитесь, что у вас есть роли iam.serviceAccounts.user на сервисный аккаунт;
+audit-trails.editor на каталог, где будет находиться трейл;
+audit-trails.viewer на облако, с которого будут собираться аудитные логи;
+logging.viewer на лог-группу Cloud Logging.
+Это можно сделать с помощью CLI, выполнив команду
+	yc iam role list,
+либо в консоли управления на странице Права доступа.
+
+yc resource-manager cloud add-access-binding \
+--role audit-trails.viewer \
+--id $(yc config get cloud-id) \
+--service-account-id $sid
+
+yc resource-manager folder add-access-binding \
+--role iam.serviceAccounts.user \
+--id $(yc config get folder-id) \
+--service-account-id $sid
+
+yc resource-manager cloud add-access-binding \
+--role logging.viewer \
+--id $(yc config get cloud-id) \
+--service-account-id $sid
+
+# Назначьте сервисному аккаунту роль logging.writer на каталог, в котором будет находиться трейл. Для этого выполните в консоли команду:
+yc resource-manager folder add-access-binding \
+--role logging.writer \
+--id $(yc config get folder-id) \
+--service-account-id $sid
+
+	yc resource-manager folder list
+
+# просмотр последний операций с облаком
+yc resource-manager cloud list-operations $(yc config get cloud-id)
+
+
+###  Назначьте сервисному аккаунту роль audit-trails.viewer
+yc iam service-account list
++----------------------+----------------+
+|          ID          |      NAME      |
++----------------------+----------------+
+| aje8m7lriu7c84jr3jmh | logg-account   |
+
+
+yc resource-manager cloud add-access-binding \
+--role audit-trails.viewer \
+--id $(yc config get cloud-id) \
+--service-account-id $sid
+
+sid=ajeor4ahc0odlo20abc8
+
+Проверка:
+	yc resource-manager cloud list-access-bindings --id $(yc config get cloud-id)
+
+Идентификаторы облака и сервисного аккаунта можно узнать в консоли управления или же с помощью CLI,
+ воспользовавшись командами
+    yc config list и
+    yc iam service-account list.
+
+ Не забудьте переключиться в CLI на yc profi    профиль, связанный с каталогом, в котором вы сейчас работаете.
+	yc config profile activate default
+
+
+## Cloud Logging
+Для анализа событий безопасности с помощью сервиса Cloud Logging нам понадобится:
+- Создать лог-группу, куда будут загружаться аудитные логи.
+- Создать сервисный аккаунт, от имени которого будут загружаться логи, и назначить ему необходимые роли.
+- Создать трейл — ресурс, который отвечает за сбор и доставку логов в лог-группу.
+- И научиться находить в этих логах интересующие нас события
+
+# Практика. Создаём систему контроля событий безопасности
+===2022.09.29====
